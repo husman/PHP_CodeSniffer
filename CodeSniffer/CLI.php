@@ -53,6 +53,13 @@ class PHP_CodeSniffer_CLI
 {
 
     /**
+     * The name of the file that holds the code delta to consider for sniff errors.
+     *
+     * @var string
+     */
+    const PHPCS_DIFF_FILE = '.phpcs.diff';
+
+    /**
      * An array of all values specified on the command line.
      *
      * @var array
@@ -89,6 +96,13 @@ class PHP_CodeSniffer_CLI
      * @var array
      */
     private $_cliArgs = array();
+
+    /**
+     * Table of files and lines to consider for errors.
+     *
+     * @var array
+     */
+    public $errorScope = array();
 
 
     /**
@@ -977,6 +991,25 @@ class PHP_CodeSniffer_CLI
             $this->errorSeverity = PHPCS_DEFAULT_ERROR_SEV;
         } else {
             $this->errorSeverity = $values['errorSeverity'];
+        }
+
+        if (file_exists(self::PHPCS_DIFF_FILE)) {
+            $errorScopes = trim(file_get_contents(self::PHPCS_DIFF_FILE));
+            $scopes = explode("\n", $errorScopes);
+
+            foreach ($scopes as $scope) {
+                if ($scope) {
+                    $e = explode(',', $scope);
+
+                    if (!isset($this->errorScope[$e[0]])) {
+                        $this->errorScope[$e[0]] = array();
+                    }
+
+                    $this->errorScope[$e[0]][$e[1]] = true;
+                }
+            }
+        } else {
+            $this->errorScope = [];
         }
 
         if ($values['warningSeverity'] === null) {
