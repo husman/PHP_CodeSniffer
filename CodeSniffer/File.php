@@ -993,7 +993,10 @@ class PHP_CodeSniffer_File
     private function _addError($error, $line, $column, $code, $data, $severity, $fixable)
     {
         $filename = $this->getFilename();
-        if (!isset($this->phpcs->cli->errorScope[$filename][$line])) {
+        if (
+            $this->phpcs->cli->errorScope
+            && !isset($this->phpcs->cli->errorScope[$filename][$line])
+        ) {
             return false;
         }
 
